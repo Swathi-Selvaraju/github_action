@@ -21,9 +21,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # Ensure Maven is installed
+      - name: Install Maven
+        run: sudo apt-get update && sudo apt-get install -y maven
+
       # Build the Spring Boot application
       - name: Build the application
-        run: ./mvn package
+        run: mvn package
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -46,8 +50,8 @@ jobs:
       - name: Build Docker image for MySQL
         run: |
           echo "FROM mysql:8.0" > Dockerfile.mysql
-          echo "ENV MYSQL_ROOT_PASSWORD=root" >> Dockerfile.mysql
-          echo "ENV MYSQL_DATABASE=springbootdb" >> Dockerfile.mysql
+          echo "ENV MYSQL_ROOT_PASSWORD=password" >> Dockerfile.mysql
+          echo "ENV MYSQL_DATABASE=ems" >> Dockerfile.mysql
           docker build -t ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest -f Dockerfile.mysql .
 
       # Push the MySQL Docker image to Docker Hub
