@@ -23,7 +23,7 @@ jobs:
 
       # Build the Spring Boot application
       - name: Build the application
-        run: ./mvnw package
+        run: ./mvn package
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
