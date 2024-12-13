@@ -21,13 +21,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Ensure Maven is installed
+      # Install Maven
       - name: Install Maven
         run: sudo apt-get update && sudo apt-get install -y maven
 
       # Build the Spring Boot application
       - name: Build the application
-        run: mvn package
+        run: mvn clean package --file ./springboot-backend/pom.xml
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -39,22 +39,20 @@ jobs:
       # Build the Docker image for Spring Boot
       - name: Build Docker image for Spring Boot
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest ./springboot-backend
 
       # Push the Spring Boot Docker image to Docker Hub
       - name: Push Docker image for Spring Boot
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest
 
-      # Build the Docker image for MySQL
-      - name: Build Docker image for MySQL
+      # Use MySQL official Docker image
+      - name: Pull MySQL Docker image
         run: |
-          echo "FROM mysql:8.0" > Dockerfile.mysql
-          echo "ENV MYSQL_ROOT_PASSWORD=password" >> Dockerfile.mysql
-          echo "ENV MYSQL_DATABASE=ems" >> Dockerfile.mysql
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest -f Dockerfile.mysql .
+          docker pull mysql:8.0
 
-      # Push the MySQL Docker image to Docker Hub
-      - name: Push Docker image for MySQL
+      # Push MySQL Docker image to Docker Hub
+      - name: Push MySQL Docker image
         run: |
+          docker tag mysql:8.0 ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest
