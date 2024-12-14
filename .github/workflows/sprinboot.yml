@@ -3,7 +3,7 @@ name: Build and Push Spring Boot Image
 on:
   push:
     branches:
-      - feature
+      - main
 
 jobs:
   build:
@@ -36,7 +36,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
- username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build the application
