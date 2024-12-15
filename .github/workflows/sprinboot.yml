@@ -37,34 +37,25 @@ jobs:
           java-version: '17'
 
           distribution: 'adopt'
+     # Step 3: Start MySQL container
 
+        docker run -d --name mysql-container \
+        -e MYSQL_ROOT_PASSWORD=password \
+        -e MYSQL_DATABASE=ems \
+        -e MYSQL_USER=username \
+        -e MYSQL_PASSWORD=password \
+        -p 3306:3306 mysql:8.0
 
-
-      # Step 3: Start MySQL container
-
-      - name: Start MySQL
-
-        run: |
-
-          docker run -d --name mysql-container \
-
-            -e MYSQL_ROOT_PASSWORD=password \
-
-            -e MYSQL_DATABASE=ems\
-
-            -e MYSQL_USER=username \
-
-            -e MYSQL_PASSWORD=password \
-
-            -p 3306:3306 mysql:8.0
-
-          # Wait for MySQL to initialize
-
-          for i in {1..30}; do
-
-            docker exec mysql-container mysqladmin ping -h "127.0.0.1" --password=0612 && break || sleep 2;
-
-          done
+     # Wait for MySQL to initialize
+        for i in {1..30}; do
+        if docker exec mysql-container mysqladmin ping -h "127.0.0.1" --silent; then
+          echo "MySQL is up and running."
+        break
+        else
+         echo "Waiting for MySQL to initialize..."
+        sleep 2
+        fi
+        done
 
 
 
