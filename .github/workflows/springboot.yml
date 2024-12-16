@@ -67,10 +67,3 @@ jobs:
         run: |
           docker tag backend-springboot:latest swathiselvaraju/backend-springboot:latest
           docker push swathiselvaraju/backend-springboot:latest
-      # Step 7: Deploy to a server
-      - name: Deploy Application
-        run: |
-          ssh user@swathi "docker pull swathiselvaraju/backend-springboot:latest && \
-          docker stop backend-springboot || true && \
-          docker rm backend-springboot || true && \
-          docker run -d -p 8080:8080 --name backend-springboot swathiselvaraju/backend-springboot:latest"
