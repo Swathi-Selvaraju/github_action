@@ -1,0 +1,151 @@
+
+name: Spring Boot Application CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      # Step 3: Start MySQL container
+      - name: Start MySQL Container
+        run: |
+          docker run -d --name mysql-container \
+            -e MYSQL_ROOT_PASSWORD=password \
+            -e MYSQL_DATABASE=ems \
+            -e MYSQL_USER=username \
+            -e MYSQL_PASSWORD=password \
+            -p 3306:3306 mysql:8.0
+          # Wait for MySQL to initialize
+          for i in {1..30}; do
+            if docker exec mysql-container mysqladmin ping -h "127.0.0.1" --silent; then
+              echo "MySQL is up and running."
+              break
+            else
+              echo "Waiting for MySQL to initialize..."
+              sleep 2
+            fi
+          done
+      # Step 4: Build the Spring Boot application
+      - name: Build with Maven (Clean)
+        run: mvn clean
+        working-directory: ./springboot-backend
+
+      - name: Build with Maven (Install)
+        run: mvn install -DskipTests
+        working-directory: ./springboot-backend
+
+      # Step 5: Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t backend-springboot:latest .
+        working-directory: ./springboot-backend
+
+      # Step 6: Push Docker image to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Push Docker Image
+        run: |
+          docker tag backend-springboot:latest swathiselvaraju/backend-springboot:latest
+          docker push swathiselvaraju/backend-springboot:latest
+      # Step 7: Deploy to a server
+      - name: Deploy Application
+        run: |
+          ssh user@swathi "docker pull swathiselvaraju/backend-springboot:latest && \
+          docker stop backend-springboot || true && \
+          docker rm backend-springboot || true && \
+          docker run -d -p 8080:8080 --name backend-springboot swathiselvaraju/backend-springboot:latest"
+name: Spring Boot Application CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      # Step 3: Start MySQL container
+      - name: Start MySQL Container
+        run: |
+          docker run -d --name mysql-container \
+            -e MYSQL_ROOT_PASSWORD=password \
+            -e MYSQL_DATABASE=ems \
+            -e MYSQL_USER=username \
+            -e MYSQL_PASSWORD=password \
+            -p 3306:3306 mysql:8.0
+          # Wait for MySQL to initialize
+          for i in {1..30}; do
+            if docker exec mysql-container mysqladmin ping -h "127.0.0.1" --silent; then
+              echo "MySQL is up and running."
+              break
+            else
+              echo "Waiting for MySQL to initialize..."
+              sleep 2
+            fi
+          done
+      # Step 4: Build the Spring Boot application
+      - name: Build with Maven (Clean)
+        run: mvn clean
+        working-directory: ./springboot-backend
+
+      - name: Build with Maven (Install)
+        run: mvn install -DskipTests
+        working-directory: ./springboot-backend
+
+      # Step 5: Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t backend-springboot:latest .
+        working-directory: ./springboot-backend
+
+      # Step 6: Push Docker image to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Push Docker Image
+        run: |
+          docker tag backend-springboot:latest swathiselvaraju/backend-springboot:latest
+          docker push swathiselvaraju/backend-springboot:latest
+      # Step 7: Deploy to a server
+      - name: Deploy Application
+        run: |
+          ssh user@swathi "docker pull swathiselvaraju/backend-springboot:latest && \
+          docker stop backend-springboot || true && \
+          docker rm backend-springboot || true && \
+          docker run -d -p 8080:8080 --name backend-springboot swathiselvaraju/backend-springboot:latest"
