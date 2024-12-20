@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run data.sh script
+      - name: Run date.sh script
         run: |
-          chmod +x ./data.sh
-          ./data.sh
+          chmod +x ./date.sh
+          ./date.sh
